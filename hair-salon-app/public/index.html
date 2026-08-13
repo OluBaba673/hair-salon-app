@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Olu-Deb Hair Place — Book an Appointment</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="site">
+  <h1 id="businessName">Olu-Deb Hair Place</h1>
+  <p id="hours">Mon–Sat, 10am–6pm</p>
+  <p id="contactEmail"></p>
+</header>
+
+<main>
+  <div id="formCard" class="card">
+    <div id="messageBox"></div>
+
+    <label>1. Choose a service</label>
+    <div id="serviceGrid" class="service-grid"></div>
+
+    <label for="dateInput">2. Choose a date</label>
+    <input type="date" id="dateInput" />
+    <p class="muted" id="dateHint">We're closed Sundays.</p>
+
+    <label>3. Choose a time</label>
+    <div id="slotsBox" class="slots">
+      <span class="muted">Pick a service and date to see available times.</span>
+    </div>
+
+    <form id="bookingForm">
+      <label for="clientName">Your name</label>
+      <input type="text" id="clientName" required />
+
+      <label for="clientPhone">Phone number</label>
+      <input type="tel" id="clientPhone" required />
+
+      <label for="clientEmail">Email (optional)</label>
+      <input type="email" id="clientEmail" />
+
+      <label for="notes">Notes (optional)</label>
+      <textarea id="notes" placeholder="Hair length, style details, etc."></textarea>
+
+      <button type="submit" class="primary" id="submitBtn" disabled>Book Appointment</button>
+    </form>
+  </div>
+
+  <div id="confirmationCard" class="card confirmation hidden">
+    <h2>Appointment booked!</h2>
+    <dl id="confirmationDetails"></dl>
+    <p class="muted">Save this confirmation for your records. See you then!</p>
+    <button class="primary" id="bookAnotherBtn">Book another appointment</button>
+  </div>
+</main>
+
+<nav class="admin-link"><a href="admin.html">Admin login</a></nav>
+
+<script src="booking.js"></script>
+</body>
+</html>

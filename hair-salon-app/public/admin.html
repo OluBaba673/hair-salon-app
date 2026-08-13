@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Olu-Deb Hair Place</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="site">
+  <h1>Admin — Appointments</h1>
+</header>
+
+<main>
+  <div id="messageBox"></div>
+
+  <div id="loginCard" class="card">
+    <label for="passwordInput">Admin password</label>
+    <input type="password" id="passwordInput" />
+    <button class="primary" id="loginBtn">Log in</button>
+  </div>
+
+  <div id="bookingsCard" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <strong>All appointments</strong>
+      <button class="cancel-btn" id="logoutBtn">Log out</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="bookings">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Service</th>
+            <th>Client</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<nav class="admin-link"><a href="index.html">Back to booking page</a></nav>
+
+<script src="admin.js"></script>
+</body>
+</html>
