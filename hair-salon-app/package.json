@@ -1,7 +1,7 @@
 {
-  "name": "olu-deb-hair-place",
+  "name": "olu-hair-place",
   "version": "1.0.0",
-  "description": "Local appointment booking app for Olu-Deb Hair Place",
+  "description": "Appointment booking app for Olu Hair Place",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

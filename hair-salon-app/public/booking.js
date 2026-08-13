@@ -36,6 +36,7 @@ async function loadConfig() {
 
   document.getElementById('businessName').textContent = config.businessName;
   document.getElementById('contactEmail').textContent = config.contactEmail;
+  document.getElementById('footerName').textContent = config.businessName;
 
   const openDayNames = config.openDays.map((d) => DAY_NAMES[d]).join(', ');
   document.getElementById('hours').textContent = `${openDayNames}, ${formatTime12h(config.openTime)}–${formatTime12h(config.closeTime)}`;

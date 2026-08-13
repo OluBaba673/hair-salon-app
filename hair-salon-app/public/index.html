@@ -3,33 +3,58 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Olu-Deb Hair Place — Book an Appointment</title>
+<title>Olu Hair Place — Book an Appointment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 <header class="site">
-  <h1 id="businessName">Olu-Deb Hair Place</h1>
-  <p id="hours">Mon–Sat, 10am–6pm</p>
-  <p id="contactEmail"></p>
+  <div class="site-inner">
+    <p class="eyebrow">Book Your Appointment</p>
+    <h1 id="businessName">Olu Hair Place</h1>
+    <div class="header-meta">
+      <span class="meta-pill" id="hours">Mon–Sat, 10am–6pm</span>
+      <span class="meta-pill" id="contactEmail"></span>
+    </div>
+  </div>
+  <svg class="header-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0,32 C240,64 480,0 720,16 C960,32 1200,64 1440,32 L1440,60 L0,60 Z"></path>
+  </svg>
 </header>
 
 <main>
   <div id="formCard" class="card">
     <div id="messageBox"></div>
 
-    <label>1. Choose a service</label>
+    <div class="step">
+      <span class="step-num">1</span>
+      <label>Choose a service</label>
+    </div>
     <div id="serviceGrid" class="service-grid"></div>
 
-    <label for="dateInput">2. Choose a date</label>
+    <div class="step">
+      <span class="step-num">2</span>
+      <label for="dateInput">Choose a date</label>
+    </div>
     <input type="date" id="dateInput" />
     <p class="muted" id="dateHint">We're closed Sundays.</p>
 
-    <label>3. Choose a time</label>
+    <div class="step">
+      <span class="step-num">3</span>
+      <label>Choose a time</label>
+    </div>
     <div id="slotsBox" class="slots">
       <span class="muted">Pick a service and date to see available times.</span>
     </div>
 
     <form id="bookingForm">
+      <div class="step">
+        <span class="step-num">4</span>
+        <label>Your details</label>
+      </div>
+
       <label for="clientName">Your name</label>
       <input type="text" id="clientName" required />
 
@@ -47,6 +72,9 @@
   </div>
 
   <div id="confirmationCard" class="card confirmation hidden">
+    <div class="confirm-icon" aria-hidden="true">
+      <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" fill="none"/><path fill="none" d="M14 27l7 7 17-17"/></svg>
+    </div>
     <h2>Appointment booked!</h2>
     <dl id="confirmationDetails"></dl>
     <p class="muted">Save this confirmation for your records. See you then!</p>
@@ -54,7 +82,11 @@
   </div>
 </main>
 
-<nav class="admin-link"><a href="admin.html">Admin login</a></nav>
+<footer class="site-footer">
+  <p class="footer-name" id="footerName">Olu Hair Place</p>
+  <p class="muted">Questions? Reach us anytime.</p>
+  <a class="admin-link" href="admin.html">Admin login</a>
+</footer>
 
 <script src="booking.js"></script>
 </body>

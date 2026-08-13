@@ -1,4 +1,4 @@
-# Olu-Deb Hair Place — Booking App
+# Olu Hair Place — Booking App
 
 A web app for clients to book appointments: pick a service, date and time, and book. You view
 and manage bookings on a password-protected admin page. Bookings are stored in a small free
@@ -27,7 +27,7 @@ You need three free accounts for step 2 — none require a credit card:
 
 1. Go to [neon.com](https://neon.com) and sign up (email + password, or sign in with Google).
 2. Once in, click **Create a project** (or it may create one automatically). Name it anything,
-   e.g. "olu-deb-hair-place".
+   e.g. "olu-hair-place".
 3. On the project page, find **Connection Details** / **Connection string**. Copy the string —
    it looks like:
    ```
@@ -66,7 +66,7 @@ node scripts/migrate-json-to-postgres.js
 npm start
 ```
 
-You'll see `Olu-Deb Hair Place booking app running at http://localhost:3000`.
+You'll see `Olu Hair Place booking app running at http://localhost:3000`.
 
 - **Clients** book at: `http://localhost:3000`
 - **You** manage bookings at: `http://localhost:3000/admin.html`
@@ -109,9 +109,9 @@ Leave the terminal window open — closing it stops the app. `Ctrl+C` stops it o
    - `ADMIN_PASSWORD` → your admin password
    - `SESSION_SECRET` → any long random text
 6. Click **Create Web Service**. Render will build and start it — takes a few minutes.
-7. When it's done, Render gives you a public URL like
-   `https://olu-deb-hair-place.onrender.com`. That's what you share with clients.
-   Admin page: `https://olu-deb-hair-place.onrender.com/admin.html`.
+7. When it's done, Render gives you a public URL. That's what you share with clients.
+   The live site for this app is: **https://hair-salon-app-1xxw.onrender.com**
+   Admin page: **https://hair-salon-app-1xxw.onrender.com/admin.html**
 
 **Note on the free tier:** Render's free web services fall asleep after 15 minutes without
 traffic, so the first visitor after a quiet spell waits ~30–60 seconds for it to wake up —
