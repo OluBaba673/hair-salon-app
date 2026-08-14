@@ -100,10 +100,19 @@ async function setBookingStatus(id, status) {
   return rows[0] ? mapRow(rows[0]) : null;
 }
 
+async function getBookingsByPhone(phoneDigits) {
+  const { rows } = await pool.query(
+    "SELECT * FROM bookings WHERE regexp_replace(client_phone, '\\D', '', 'g') = $1 ORDER BY date DESC, start_time DESC",
+    [phoneDigits]
+  );
+  return rows.map(mapRow);
+}
+
 module.exports = {
   initDb,
   getAllBookings,
   getBookingsForDate,
   addBooking,
-  setBookingStatus
+  setBookingStatus,
+  getBookingsByPhone
 };

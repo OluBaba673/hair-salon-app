@@ -23,6 +23,16 @@
 </header>
 
 <main>
+  <div id="statusCard" class="card">
+    <p class="policies-heading">Already booked? Check your status</p>
+    <label for="statusPhoneInput">Phone number</label>
+    <div class="status-check-row">
+      <input type="tel" id="statusPhoneInput" placeholder="Phone number used to book" />
+      <button type="button" class="primary status-check-btn" id="statusCheckBtn">Check</button>
+    </div>
+    <div id="statusResults"></div>
+  </div>
+
   <div id="policiesCard" class="card policies">
     <p class="policies-heading">Kindly read our policies before booking</p>
     <div id="policiesList" class="policies-list"></div>

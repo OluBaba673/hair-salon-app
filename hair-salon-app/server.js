@@ -284,6 +284,30 @@ app.post(
   })
 );
 
+app.get(
+  '/api/bookings/lookup',
+  asyncHandler(async (req, res) => {
+    const phone = (req.query.phone || '').toString();
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 7) {
+      return res.status(400).json({ error: 'Please enter a valid phone number.' });
+    }
+
+    const bookings = await db.getBookingsByPhone(digits);
+    res.json({
+      bookings: bookings.map((b) => ({
+        clientName: b.clientName,
+        serviceName: b.serviceName,
+        date: b.date,
+        startTime: b.startTime,
+        endTime: b.endTime,
+        price: b.price,
+        status: b.status
+      }))
+    });
+  })
+);
+
 // ---------- admin API ----------
 
 app.post('/api/admin/login', (req, res) => {

@@ -30,6 +30,59 @@ function showMessage(text, type) {
   messageBox.innerHTML = text ? `<div class="message ${type}">${text}</div>` : '';
 }
 
+const STATUS_LABELS = {
+  pending_payment: 'Awaiting deposit',
+  confirmed: 'Confirmed',
+  declined: 'Declined',
+  cancelled: 'Cancelled'
+};
+
+async function checkStatus() {
+  const phoneInput = document.getElementById('statusPhoneInput');
+  const resultsBox = document.getElementById('statusResults');
+  const phone = phoneInput.value.trim();
+
+  if (phone.replace(/\D/g, '').length < 7) {
+    resultsBox.innerHTML = '<p class="muted">Please enter the phone number you used to book.</p>';
+    return;
+  }
+
+  resultsBox.innerHTML = '<p class="muted">Checking…</p>';
+
+  const res = await fetch(`/api/bookings/lookup?phone=${encodeURIComponent(phone)}`);
+  const data = await res.json();
+
+  if (!res.ok) {
+    resultsBox.innerHTML = `<p class="muted">${data.error || 'Something went wrong. Please try again.'}</p>`;
+    return;
+  }
+
+  if (!data.bookings.length) {
+    resultsBox.innerHTML = '<p class="muted">No appointments found for that phone number.</p>';
+    return;
+  }
+
+  resultsBox.innerHTML = '';
+  const list = document.createElement('div');
+  list.className = 'policies-list';
+  data.bookings.forEach((b) => {
+    const item = document.createElement('div');
+    item.className = 'policy-item';
+    item.innerHTML = `
+      <p class="policy-title">${b.serviceName} — ${b.date}</p>
+      <p class="policy-text">${formatTime12h(b.startTime)} – ${formatTime12h(b.endTime)} · $${b.price}</p>
+      <span class="status-badge ${b.status}">${STATUS_LABELS[b.status] || b.status}</span>
+    `;
+    list.appendChild(item);
+  });
+  resultsBox.appendChild(list);
+}
+
+document.getElementById('statusCheckBtn').addEventListener('click', checkStatus);
+document.getElementById('statusPhoneInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') checkStatus();
+});
+
 async function loadConfig() {
   const res = await fetch('/api/config');
   config = await res.json();

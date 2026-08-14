@@ -130,11 +130,29 @@ main {
 }
 
 .policy-text {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 0.85rem;
   color: var(--muted);
   line-height: 1.5;
 }
+
+.status-check-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.status-check-row input { margin-bottom: 0; flex: 1; }
+
+.status-check-btn {
+  width: auto;
+  margin-top: 0;
+  padding: 11px 20px;
+  white-space: nowrap;
+}
+
+#statusResults { margin-top: 16px; }
+#statusResults:empty { margin-top: 0; }
 
 .section-divider {
   display: flex;
@@ -438,6 +456,22 @@ button.primary:disabled { opacity: 0.4; cursor: not-allowed; }
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.rotate-hint {
+  display: none;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  background: rgba(217, 181, 105, 0.1);
+  border: 1px solid rgba(217, 181, 105, 0.3);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .rotate-hint { display: block; }
 }
 
 .table-scroll { overflow-x: auto; }
