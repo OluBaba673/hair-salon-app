@@ -217,7 +217,8 @@ app.get('/api/config', (req, res) => {
     closeTime: config.closeTime,
     services: config.services,
     depositPercent: config.depositPercent,
-    interacEmail: config.interacEmail
+    interacEmail: config.interacEmail,
+    policies: config.policies
   });
 });
 

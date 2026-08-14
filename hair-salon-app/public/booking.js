@@ -41,6 +41,15 @@ async function loadConfig() {
   const openDayNames = config.openDays.map((d) => DAY_NAMES[d]).join(', ');
   document.getElementById('hours').textContent = `${openDayNames}, ${formatTime12h(config.openTime)}–${formatTime12h(config.closeTime)}`;
 
+  const policiesList = document.getElementById('policiesList');
+  policiesList.innerHTML = '';
+  (config.policies || []).forEach((p) => {
+    const item = document.createElement('div');
+    item.className = 'policy-item';
+    item.innerHTML = `<p class="policy-title">${p.title}</p><p class="policy-text">${p.text}</p>`;
+    policiesList.appendChild(item);
+  });
+
   serviceGrid.innerHTML = '';
   config.services.forEach((s) => {
     const hrs = (s.durationMinutes / 60).toFixed(s.durationMinutes % 60 === 0 ? 0 : 1);
