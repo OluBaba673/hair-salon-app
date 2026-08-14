@@ -5,6 +5,7 @@ const path = require('path');
 
 const config = require('./config');
 const db = require('./db');
+const mailer = require('./mailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -90,6 +91,112 @@ async function getAvailableSlots(serviceId, dateStr) {
   return { slots };
 }
 
+function depositAmount(price) {
+  return Math.round(price * config.depositPercent * 100) / 100;
+}
+
+function adminUrl(req) {
+  return `${req.protocol}://${req.get('host')}/admin.html`;
+}
+
+async function sendPendingEmails(req, booking) {
+  const deposit = depositAmount(booking.price);
+
+  await mailer.sendMail({
+    to: booking.clientEmail,
+    subject: `Appointment request received — ${booking.serviceName} on ${booking.date}`,
+    text: `Hi ${booking.clientName},
+
+Thanks for booking with ${config.businessName}!
+
+Service: ${booking.serviceName}
+Date: ${booking.date}
+Time: ${booking.startTime}–${booking.endTime}
+Total price: $${booking.price}
+
+To confirm this appointment, please send a deposit of $${deposit} (${Math.round(config.depositPercent * 100)}%) via Interac e-Transfer to:
+${config.interacEmail}
+
+Once we've confirmed your payment, you'll get another email confirming your appointment. If we're unable to confirm the deposit, this appointment will be declined and the time slot released.
+
+Questions? Reply to ${config.contactEmail}.
+
+— ${config.businessName}`
+  });
+
+  await mailer.sendMail({
+    to: config.contactEmail,
+    subject: `New booking pending deposit — ${booking.clientName}, ${booking.serviceName} on ${booking.date}`,
+    text: `New appointment request awaiting deposit confirmation:
+
+Client: ${booking.clientName}
+Phone: ${booking.clientPhone}
+Email: ${booking.clientEmail}
+Service: ${booking.serviceName}
+Date: ${booking.date}
+Time: ${booking.startTime}–${booking.endTime}
+Deposit expected: $${deposit} (${Math.round(config.depositPercent * 100)}% of $${booking.price})
+Notes: ${booking.notes || '(none)'}
+
+Once you've confirmed the Interac e-Transfer arrived, accept or decline this booking here:
+${adminUrl(req)}`
+  });
+}
+
+async function sendConfirmedEmail(booking) {
+  await mailer.sendMail({
+    to: booking.clientEmail,
+    subject: `Appointment confirmed — ${booking.serviceName} on ${booking.date}`,
+    text: `Hi ${booking.clientName},
+
+Great news — your deposit has been confirmed and your appointment is locked in!
+
+Service: ${booking.serviceName}
+Date: ${booking.date}
+Time: ${booking.startTime}–${booking.endTime}
+
+See you then!
+
+— ${config.businessName}`
+  });
+}
+
+async function sendDeclinedEmail(booking) {
+  await mailer.sendMail({
+    to: booking.clientEmail,
+    subject: `Appointment declined — ${booking.serviceName} on ${booking.date}`,
+    text: `Hi ${booking.clientName},
+
+We're sorry, but we weren't able to confirm your deposit for this appointment, so it has been declined and the time slot released:
+
+Service: ${booking.serviceName}
+Date: ${booking.date}
+Time: ${booking.startTime}–${booking.endTime}
+
+If you'd still like this appointment, please book again, or contact us at ${config.contactEmail} with questions.
+
+— ${config.businessName}`
+  });
+}
+
+async function sendCancelledEmail(booking) {
+  await mailer.sendMail({
+    to: booking.clientEmail,
+    subject: `Appointment cancelled — ${booking.serviceName} on ${booking.date}`,
+    text: `Hi ${booking.clientName},
+
+Your appointment has been cancelled:
+
+Service: ${booking.serviceName}
+Date: ${booking.date}
+Time: ${booking.startTime}–${booking.endTime}
+
+Contact us at ${config.contactEmail} with any questions.
+
+— ${config.businessName}`
+  });
+}
+
 function requireAdmin(req, res, next) {
   if (req.session && req.session.isAdmin) return next();
   return res.status(401).json({ error: 'Not authenticated' });
@@ -108,7 +215,9 @@ app.get('/api/config', (req, res) => {
     openDays: config.openDays,
     openTime: config.openTime,
     closeTime: config.closeTime,
-    services: config.services
+    services: config.services,
+    depositPercent: config.depositPercent,
+    interacEmail: config.interacEmail
   });
 });
 
@@ -130,10 +239,10 @@ app.post(
   asyncHandler(async (req, res) => {
     const { serviceId, date, startTime, clientName, clientPhone, clientEmail, notes } = req.body || {};
 
-    if (!serviceId || !date || !startTime || !clientName || !clientPhone) {
+    if (!serviceId || !date || !startTime || !clientName || !clientPhone || !clientEmail) {
       return res
         .status(400)
-        .json({ error: 'serviceId, date, startTime, clientName and clientPhone are required' });
+        .json({ error: 'serviceId, date, startTime, clientName, clientPhone and clientEmail are required' });
     }
 
     const service = findService(serviceId);
@@ -164,11 +273,13 @@ app.post(
       endTime,
       clientName: String(clientName).trim(),
       clientPhone: String(clientPhone).trim(),
-      clientEmail: clientEmail ? String(clientEmail).trim() : '',
+      clientEmail: String(clientEmail).trim(),
       notes: notes ? String(notes).trim() : ''
     });
 
-    res.status(201).json({ booking });
+    sendPendingEmails(req, booking).catch((err) => console.error('Failed to send pending emails:', err));
+
+    res.status(201).json({ booking, depositAmount: depositAmount(booking.price) });
   })
 );
 
@@ -200,12 +311,41 @@ app.get(
   })
 );
 
+app.post(
+  '/api/admin/bookings/:id/accept',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const booking = await db.setBookingStatus(req.params.id, 'confirmed');
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.clientEmail) {
+      sendConfirmedEmail(booking).catch((err) => console.error('Failed to send confirmed email:', err));
+    }
+    res.json({ booking });
+  })
+);
+
+app.post(
+  '/api/admin/bookings/:id/decline',
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const booking = await db.setBookingStatus(req.params.id, 'declined');
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.clientEmail) {
+      sendDeclinedEmail(booking).catch((err) => console.error('Failed to send declined email:', err));
+    }
+    res.json({ booking });
+  })
+);
+
 app.delete(
   '/api/admin/bookings/:id',
   requireAdmin,
   asyncHandler(async (req, res) => {
-    const booking = await db.cancelBooking(req.params.id);
+    const booking = await db.setBookingStatus(req.params.id, 'cancelled');
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.clientEmail) {
+      sendCancelledEmail(booking).catch((err) => console.error('Failed to send cancelled email:', err));
+    }
     res.json({ booking });
   })
 );

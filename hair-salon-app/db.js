@@ -16,7 +16,7 @@ async function initDb() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS bookings (
       id UUID PRIMARY KEY,
-      status TEXT NOT NULL DEFAULT 'confirmed',
+      status TEXT NOT NULL DEFAULT 'pending_payment',
       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
       service_id TEXT NOT NULL,
       service_name TEXT NOT NULL,
@@ -58,8 +58,10 @@ async function getAllBookings() {
 }
 
 async function getBookingsForDate(date) {
+  // Both pending_payment and confirmed bookings hold the time slot;
+  // only declined/cancelled bookings release it.
   const { rows } = await pool.query(
-    "SELECT * FROM bookings WHERE date = $1 AND status != 'cancelled'",
+    "SELECT * FROM bookings WHERE date = $1 AND status IN ('pending_payment', 'confirmed')",
     [date]
   );
   return rows.map(mapRow);
@@ -69,8 +71,8 @@ async function addBooking(booking) {
   const id = crypto.randomUUID();
   const { rows } = await pool.query(
     `INSERT INTO bookings
-      (id, service_id, service_name, price, duration_minutes, date, start_time, end_time, client_name, client_phone, client_email, notes)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      (id, status, service_id, service_name, price, duration_minutes, date, start_time, end_time, client_name, client_phone, client_email, notes)
+     VALUES ($1, 'pending_payment', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
      RETURNING *`,
     [
       id,
@@ -90,10 +92,10 @@ async function addBooking(booking) {
   return mapRow(rows[0]);
 }
 
-async function cancelBooking(id) {
+async function setBookingStatus(id, status) {
   const { rows } = await pool.query(
-    "UPDATE bookings SET status = 'cancelled' WHERE id = $1 RETURNING *",
-    [id]
+    'UPDATE bookings SET status = $2 WHERE id = $1 RETURNING *',
+    [id, status]
   );
   return rows[0] ? mapRow(rows[0]) : null;
 }
@@ -103,5 +105,5 @@ module.exports = {
   getAllBookings,
   getBookingsForDate,
   addBooking,
-  cancelBooking
+  setBookingStatus
 };

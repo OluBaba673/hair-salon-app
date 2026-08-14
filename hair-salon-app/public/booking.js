@@ -148,7 +148,7 @@ bookingForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    showConfirmation(data.booking);
+    showConfirmation(data.booking, data.depositAmount);
   } catch (err) {
     showMessage('Could not reach the server. Please try again.', 'error');
     submitBtn.disabled = false;
@@ -156,7 +156,7 @@ bookingForm.addEventListener('submit', async (e) => {
   }
 });
 
-function showConfirmation(booking) {
+function showConfirmation(booking, depositAmount) {
   formCard.classList.add('hidden');
   confirmationCard.classList.remove('hidden');
   confirmationDetails.innerHTML = `
@@ -167,6 +167,8 @@ function showConfirmation(booking) {
     <dt>Name</dt><dd>${booking.clientName}</dd>
     <dt>Phone</dt><dd>${booking.clientPhone}</dd>
   `;
+  document.getElementById('paymentAmount').textContent = `$${depositAmount} (${Math.round(config.depositPercent * 100)}%)`;
+  document.getElementById('paymentEmail').textContent = config.interacEmail;
 }
 
 document.getElementById('bookAnotherBtn').addEventListener('click', () => {

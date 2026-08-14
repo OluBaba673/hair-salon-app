@@ -1,6 +1,8 @@
 module.exports = {
   businessName: 'Olu Hair Place',
   contactEmail: 'Olujaye92@gmail.com',
+  depositPercent: 0.3,
+  interacEmail: 'Olujaye92@gmail.com',
   // 0 = Sunday, 1 = Monday, ... 6 = Saturday
   openDays: [1, 2, 3, 4, 5, 6],
   openTime: '10:00',

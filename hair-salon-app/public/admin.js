@@ -15,6 +15,13 @@ function formatTime12h(hhmm) {
   return `${h12}:${String(m).padStart(2, '0')} ${period}`;
 }
 
+const STATUS_LABELS = {
+  pending_payment: 'Pending deposit',
+  confirmed: 'Confirmed',
+  declined: 'Declined',
+  cancelled: 'Cancelled'
+};
+
 async function checkSession() {
   const res = await fetch('/api/admin/session');
   const data = await res.json();
@@ -56,8 +63,9 @@ async function showBookings() {
   bookingsBody.innerHTML = '';
   data.bookings.forEach((b) => {
     const tr = document.createElement('tr');
-    if (b.status === 'cancelled') tr.classList.add('cancelled');
+    if (b.status === 'cancelled' || b.status === 'declined') tr.classList.add(b.status);
     tr.innerHTML = `
+      <td><span class="status-badge ${b.status}">${STATUS_LABELS[b.status] || b.status}</span></td>
       <td>${b.date}</td>
       <td>${formatTime12h(b.startTime)} – ${formatTime12h(b.endTime)}</td>
       <td>${b.serviceName} ($${b.price})</td>
@@ -67,19 +75,45 @@ async function showBookings() {
       <td>${b.notes || ''}</td>
       <td></td>
     `;
-    if (b.status !== 'cancelled') {
-      const btn = document.createElement('button');
-      btn.className = 'cancel-btn';
-      btn.textContent = 'Cancel';
-      btn.addEventListener('click', () => cancelBooking(b.id));
-      tr.lastElementChild.appendChild(btn);
+
+    const actionsCell = tr.lastElementChild;
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    if (b.status === 'pending_payment') {
+      const acceptBtn = document.createElement('button');
+      acceptBtn.className = 'action-btn accept';
+      acceptBtn.textContent = 'Accept';
+      acceptBtn.addEventListener('click', () => actOnBooking(b.id, 'accept'));
+      actions.appendChild(acceptBtn);
+
+      const declineBtn = document.createElement('button');
+      declineBtn.className = 'action-btn decline';
+      declineBtn.textContent = 'Decline';
+      declineBtn.addEventListener('click', () => actOnBooking(b.id, 'decline'));
+      actions.appendChild(declineBtn);
+    } else if (b.status === 'confirmed') {
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', () => cancelBooking(b.id));
+      actions.appendChild(cancelBtn);
     }
+
+    actionsCell.appendChild(actions);
     bookingsBody.appendChild(tr);
   });
 
   if (!data.bookings.length) {
-    bookingsBody.innerHTML = '<tr><td colspan="8" class="muted">No appointments yet.</td></tr>';
+    bookingsBody.innerHTML = '<tr><td colspan="9" class="muted">No appointments yet.</td></tr>';
   }
+}
+
+async function actOnBooking(id, action) {
+  const verb = action === 'accept' ? 'accept this booking (deposit confirmed)' : 'decline this booking';
+  if (!confirm(`Are you sure you want to ${verb}?`)) return;
+  const res = await fetch(`/api/admin/bookings/${id}/${action}`, { method: 'POST' });
+  if (res.ok) showBookings();
 }
 
 async function cancelBooking(id) {

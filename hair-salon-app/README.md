@@ -58,6 +58,23 @@ copy it into the new database:
 node scripts/migrate-json-to-postgres.js
 ```
 
+### 4. Set up email alerts (deposit workflow)
+
+Bookings now require a 30% deposit before they're confirmed. When a client books, the app
+emails them payment instructions and emails you a heads-up — for that to work, it needs to
+send email through a Gmail account.
+
+1. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) while
+   signed into the Gmail account you want to send from (2-Step Verification must be turned on
+   first — Google will prompt you to enable it if it isn't).
+2. Under "App name," type something like `Olu Hair Place App` and click **Create**.
+3. Google shows a 16-character code (like `abcd efgh ijkl mnop`). Copy it.
+4. Open `.env` and paste it after `EMAIL_APP_PASSWORD=` (remove any spaces), and confirm
+   `EMAIL_USER=` has the Gmail address you used. Save.
+
+This code is revocable any time from the same Google page — it is not your real Gmail
+password, and Claude never sees or handles your actual password.
+
 ---
 
 ## Part 2 — Running it on your laptop
@@ -104,10 +121,13 @@ Leave the terminal window open — closing it stops the app. `Ctrl+C` stops it o
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
    - **Instance Type**: Free
-5. Under **Environment Variables**, add these three (same values as your local `.env`):
+5. Under **Environment Variables**, click **"Add from .env"** and paste your whole local
+   `.env` file content in one go (same idea as before — it'll split into rows automatically):
    - `DATABASE_URL` → your Neon connection string
    - `ADMIN_PASSWORD` → your admin password
    - `SESSION_SECRET` → any long random text
+   - `EMAIL_USER` → the Gmail address sending notifications
+   - `EMAIL_APP_PASSWORD` → the Gmail App Password from Part 1, Step 4
 6. Click **Create Web Service**. Render will build and start it — takes a few minutes.
 7. When it's done, Render gives you a public URL. That's what you share with clients.
    The live site for this app is: **https://hair-salon-app-1xxw.onrender.com**
@@ -144,6 +164,24 @@ commit and push the change, then Render redeploys automatically.
 - If two people try to grab the same slot at the same moment, the second is told it's no
   longer available and asked to pick another.
 
+## How the deposit/approval workflow works
+
+1. A client books — the appointment is created with status **Pending deposit** and the time
+   slot is held (no one else can book over it).
+2. The client sees an on-screen message and gets an email with the deposit amount (30% of the
+   service price) and your Interac e-Transfer email to send it to.
+3. You get an email too, letting you know a new booking needs a deposit check.
+4. Once you've checked your bank/email and the e-transfer has actually arrived, go to the
+   admin page and click **Accept** (deposit confirmed → appointment locked in, client emailed)
+   or **Decline** (no payment → appointment removed, time slot released, client emailed).
+5. Confirmed appointments can still be **Cancelled** later from the admin page if needed
+   (the client is emailed about that too).
+
+There's no automatic time limit on pending bookings — they stay pending, holding the slot,
+until you accept or decline them. The app has no way to detect the Interac transfer itself
+(no small business has API access to that) — checking your bank/email and clicking
+Accept/Decline is a manual step, by design.
+
 ## Your data
 
 Bookings live in your Neon Postgres database, not in a file on your laptop. Neon's free tier
@@ -152,6 +190,8 @@ activity and wakes it back up automatically on the next request.
 
 ## Limitations (kept basic, as requested)
 
-- No automatic email/text confirmations to clients — you see contact info in the admin page
-  and can reach out directly.
-- Single admin password, no individual staff logins.
+- No SMS/text notifications — email only.
+- Single admin password shared by you and anyone you give it to (e.g. someone helping manage
+  bookings) — no individual staff logins or permission levels.
+- If `EMAIL_USER`/`EMAIL_APP_PASSWORD` aren't set, the app still works fine — it just skips
+  sending emails and logs a note in the server console instead of failing the booking.

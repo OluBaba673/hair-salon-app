@@ -61,8 +61,8 @@
       <label for="clientPhone">Phone number</label>
       <input type="tel" id="clientPhone" required />
 
-      <label for="clientEmail">Email (optional)</label>
-      <input type="email" id="clientEmail" />
+      <label for="clientEmail">Email</label>
+      <input type="email" id="clientEmail" required />
 
       <label for="notes">Notes (optional)</label>
       <textarea id="notes" placeholder="Hair length, style details, etc."></textarea>
@@ -72,12 +72,18 @@
   </div>
 
   <div id="confirmationCard" class="card confirmation hidden">
-    <div class="confirm-icon" aria-hidden="true">
-      <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" fill="none"/><path fill="none" d="M14 27l7 7 17-17"/></svg>
+    <div class="confirm-icon pending" aria-hidden="true">
+      <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="25" fill="none"/><path fill="none" d="M26 14v13l9 5"/></svg>
     </div>
-    <h2>Appointment booked!</h2>
+    <h2 class="pending-heading">Almost there!</h2>
+    <p class="muted">Your appointment request has been received. It's held for you, but not confirmed yet.</p>
     <dl id="confirmationDetails"></dl>
-    <p class="muted">Save this confirmation for your records. See you then!</p>
+    <div class="payment-box">
+      <p class="payment-label">Send your deposit via Interac e-Transfer to confirm</p>
+      <p class="payment-amount" id="paymentAmount"></p>
+      <p class="payment-to">to <strong id="paymentEmail"></strong></p>
+    </div>
+    <p class="muted">We'll email you as soon as your deposit is confirmed. If it can't be confirmed, this time slot will be released.</p>
     <button class="primary" id="bookAnotherBtn">Book another appointment</button>
   </div>
 </main>

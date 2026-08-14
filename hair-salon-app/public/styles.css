@@ -10,6 +10,7 @@
   --border: #ecdfda;
   --success: #2e7a4f;
   --danger: #b23a3a;
+  --pending: #b5792a;
   --shadow: 0 12px 30px rgba(94, 36, 51, 0.08);
 }
 
@@ -301,7 +302,13 @@ button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
   stroke-linejoin: round;
 }
 
-.confirmation h2 { margin: 0 0 18px; color: var(--success); font-size: 1.5rem; }
+.confirm-icon.pending circle,
+.confirm-icon.pending path {
+  stroke: var(--pending);
+}
+
+.confirmation h2 { margin: 0 0 10px; color: var(--success); font-size: 1.5rem; }
+.confirmation h2.pending-heading { color: var(--pending); }
 
 .confirmation dl {
   display: grid;
@@ -311,11 +318,40 @@ button.primary:disabled { opacity: 0.45; cursor: not-allowed; }
   background: var(--bg);
   border-radius: 12px;
   padding: 16px 20px;
-  margin: 0 0 16px;
+  margin: 16px 0;
 }
 
 .confirmation dt { color: var(--muted); }
 .confirmation dd { margin: 0; font-weight: 600; }
+
+.payment-box {
+  background: #fdf3e7;
+  border: 1px solid #f0d9b5;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin: 0 0 16px;
+}
+
+.payment-label {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--pending);
+  font-weight: 600;
+}
+
+.payment-amount {
+  margin: 0 0 4px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.payment-to {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
 
 .hidden { display: none !important; }
 
@@ -375,9 +411,29 @@ table.bookings td {
 }
 
 table.bookings tbody tr:hover { background: var(--brand-light); }
-table.bookings tr.cancelled { opacity: 0.5; text-decoration: line-through; }
+table.bookings tr.cancelled,
+table.bookings tr.declined { opacity: 0.5; text-decoration: line-through; }
 
-.cancel-btn {
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.status-badge.pending_payment { background: #fdf3e7; color: var(--pending); }
+.status-badge.confirmed { background: #eaf6ee; color: var(--success); }
+.status-badge.declined { background: #fbe9e9; color: var(--danger); }
+.status-badge.cancelled { background: #ece5e5; color: var(--muted); }
+
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.cancel-btn,
+.action-btn {
   background: none;
   border: 1px solid var(--danger);
   color: var(--danger);
@@ -389,4 +445,12 @@ table.bookings tr.cancelled { opacity: 0.5; text-decoration: line-through; }
   transition: background 0.15s, color 0.15s;
 }
 
-.cancel-btn:hover { background: var(--danger); color: #fff; }
+.cancel-btn:hover,
+.action-btn.decline:hover { background: var(--danger); color: #fff; }
+
+.action-btn.accept {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.action-btn.accept:hover { background: var(--success); color: #fff; }
